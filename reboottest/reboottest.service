@@ -1,0 +1,10 @@
+[Unit]
+Description=reboot test service
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/home/gwi/functest/reboottest/reboottest.sh
+
+[Install]
+WantedBy=graphical.target
