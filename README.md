@@ -14,6 +14,6 @@ Testing depends following components
 - gnome-terminal
 - atftp
 - memtest
-- ltp (old and micro modified, in ref dir)
+- ltp (old and micro modified, in dep dir)
 
 Desktop shortcut in ref dir
