@@ -16,4 +16,4 @@ Testing depends following components
 - memtest
 - ltp (old and micro modified, in dep dir)
 
-Desktop shortcut in ref dir
+Desktop shortcut in data dir
