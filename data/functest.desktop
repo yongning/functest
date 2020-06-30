@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Exec=/opt/functest/func_test.sh
+Name=功能测试
+Icon=/opt/functest/data/icon.png
