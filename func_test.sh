@@ -646,25 +646,24 @@ then
 
     rebootcurnum=0
 
-    if [ ! -e "$RESULTPATH/rebootnum.data" ]
-    then
-        echo 0 > "$RESULTPATH/rebootnum.data"
-        chmod 777 "$RESULTPATH/rebootnum.data"
-        cp "$REALDIR/reboottest/reboottest.service" /etc/systemd/system/reboottest.service
-        chmod 777 /etc/systemd/system/reboottest.service
-        systemctl daemon-reload
-        systemctl enable reboottest.service
-    else
-        read line < "$RESULTPATH/rebootnum.data"
-        rebootcurnum=`expr $line + 1`
-        echo $rebootcurnum
-        echo $rebootcurnum > "$RESULTPATH/rebootnum.data"
+    if [ -e "$RESULTPATH/rebootnum.data" ] ; then
+	echo "[警示]:[系统重启]:[]:[系统重启测试开始检测到异常rebootnum.data文件]"
+	echo "[WARNING]:[Sysreboot]:[]:[Sysreboot detects abnormal rebootnum.data file]" >> "RESULTPATH/$fileprefix.log"
+	mv "$RESULTPATH/rebootnum.data" "$RESULTPATH/rebootnumabn.data"
     fi
+	
+    echo 0 > "$RESULTPATH/rebootnum.data"
+    chmod 777 "$RESULTPATH/rebootnum.data"
+    cp "$REALDIR/reboottest/reboottest.service" /etc/systemd/system/reboottest.service
+    chmod 777 /etc/systemd/system/reboottest.service
+    systemctl daemon-reload
+    systemctl enable reboottest.service
 
     if [ $rebootcurnum -gt $rebootnumdef ]
     then
-        echo "reboot test succeed"
-        mv "$RESULTPATH/rebootnum.data" "$RESULTPATH/rebootnumbak.data"
+        echo "[警示]:[系统重启]:[]:[系统重启测试次数$rebootnumdef设置错误，请检查配置文件]"
+	echo "[WARNING]:[Sysreboot]:[]:[Sysreboot configured number $rebootnumdef error, check conf file]" >> "RESULTPATH/$fileprefix.log"
+        mv "$RESULTPATH/rebootnum.data" "$RESULTPATH/rebootnumbakabn.data"
         rm /etc/systemd/system/reboottest.service
         systemctl daemon-reload
     else

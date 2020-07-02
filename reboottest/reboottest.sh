@@ -24,8 +24,11 @@ else
     rebootcurnum=`expr $line + 1`
     # echo $rebootcurnum
     echo $rebootcurnum > "$RESULTPATH/rebootnum.data"
+    monthday="$(LANG=C date "+%b%d")"
     timetemp="$(LANG=C date "+%T" | tr -d ':')"
-    echo $rebootcurnum > "$RESULTPATH/$timetemp.log"
+    echo $rebootcurnum > "$RESULTPATH/$monthday$timetemp.log"
+    sync "$RESULTPATH/$monthday$timetemp.log"
+    sync "RESULTPATH/rebootnum.data"
 fi
 
 if [ $rebootcurnum -gt $rebootnumdef ]
@@ -43,8 +46,9 @@ then
     
     globalserver="$(cat $CONFFILE | jq -r '.global.server')"
 
-    sleep 15
+    sleep 30
     atftp -p -l "$RESULTPATH/reboot$fileprefix.data" -r "reboot$fileprefix.data" $globalserver
+    zenity --info --width=700 --title="单板重启测试" --text="单板重启$rebootnumdef次成功"
 else
    reboot
 fi
