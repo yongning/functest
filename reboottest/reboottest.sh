@@ -34,6 +34,9 @@ fi
 if [ $rebootcurnum -gt $rebootnumdef ]
 then
     # echo "reboot test succeed"
+    mkdir -p /root/.config/autostart
+    cp /opt/functest/reboottest/desktop /root/.config/autostart/.desktop
+    chmod 777 /root/.config/autostart/.desktop
     netdev="$(cat $CONFFILE | jq -r '.global.netdev')"
     ethmacaddr="$(LANG=C ifconfig $netdev | grep -Po 'HWaddr \K.*$' | tr -d ':')"
     gmacaddr=`expr substr "$ethmacaddr" 1 12`
@@ -46,9 +49,13 @@ then
     
     globalserver="$(cat $CONFFILE | jq -r '.global.server')"
 
-    sleep 30
-    atftp -p -l "$RESULTPATH/reboot$fileprefix.data" -r "reboot$fileprefix.data" $globalserver
-    zenity --info --width=700 --title="单板重启测试" --text="单板重启$rebootnumdef次成功"
+#    sleep 30
+#    atftp -p -l "$RESULTPATH/reboot$fileprefix.data" -r "reboot$fileprefix.data" $globalserver
+
+#    mkdir -p /root/.config/autostart
+#    cp /opt/functest/reboottest/desktop /root/.config/autostart/.desktop
+#    chmod 777 /root/.config/autostart/.desktop
+#    sleep 5
 else
    reboot
 fi

@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=SysrebootNotify
+Exec=zenity --info --width=700 --title="单板重启测试" --text="单板重启测试正常完成"
+X-GNOME-Autostart-enabled=true
