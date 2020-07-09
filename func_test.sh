@@ -1,4 +1,5 @@
 #!/bin/bash
+    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $audiotestok $message1_1 $eth1testok $message1_2 $eth2testok $message1_3 $satatestok $message1_4 $pcislottestok $message1_5 $serialtestok $message1_6 $usbtestok $message1_7 $usbdatacopytestok $message1_8 $memtestok $message1_9 $ltptestok $message1_10 --width=700 --height=400
 
 # ============================================================================
 # global config
@@ -536,7 +537,7 @@ fi
 if [ $prnenable -eq 1 ]
 then
     echo "[信息]:[打印并口]:[]:[打印并口功能检测]"
-    if [ ! -f "/dev/usb/lp0" ] ; then
+    if [ ! -e "/dev/usb/lp0" ] ; then
         echo "[错误]:[打印并口]:[]:[打印并口检测失败]"
         echo "[ERROR]:[PRN Interface]:[]:[prn interface detection error]" >> "$RESULTPATH/$fileprefix.log"
         prntestok=FASLE
