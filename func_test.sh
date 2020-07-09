@@ -86,6 +86,13 @@ if [ $swreq -ne 1 ] ; then
     exit 1
 fi
 
+swreq="$(dpkg --list alsa-utils 2>/dev/null | grep -w ii | wc -l)"
+if [ $swreq -ne 1 ] ; then
+    echo "[错误]:[全局配置]:[]:[没有检测到音频alsa软件，请通过apt安装,测试程序即将退出]"
+    echo "[ERROR]:[Global]:[]:[alsa-utils not installed, please install, application will exit]" >> "$RESULTPATH/$fileprefix.log" 
+    exit 1
+fi
+
 swreq="$(dpkg --list zenity 2>/dev/null | grep -w ii | wc -l)"
 if [ $swreq -ne 1 ] ; then
     echo "[错误]:[全局配置]:[]:[没有检测到zenity软件，请通过apt安装]"
@@ -108,108 +115,118 @@ if [ $swreq -ne 1 ] ; then
 fi
 #==========================================================================
 # test items
+sysmemenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step14.enable')"
+if [ $sysmemenable -eq 1 ]
+then
+    message1_1="系统内存检测测试"
+else
+    message1_1=
+fi
 
 audioenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step9.enable')"
 if [ $audioenable -eq 1 ]
 then
-    message1_1="音频测试"
+    message1_2="音频测试"
 else
-    message1_1=
+    message1_2=
 fi
 
 eth1enable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step7.enable')"
 if [ $eth1enable -eq 1 ]
 then
-    message1_2="以太网接口1测试"
+    message1_3="以太网接口1测试"
 else
-    message1_2=
+    message1_3=
 fi
 
 eth2enable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step8.enable')"
 if [ $eth2enable -eq 1 ]
 then
-    message1_3="以太网接口2测试"
+    message1_4="以太网接口2测试"
 else
-    message1_3=
+    message1_4=
 fi
 
 sataenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step10.enable')"
 if [ $sataenable -eq 1 ]
 then
-    message1_4="SATA第二接口测试"
+    message1_5="SATA第二接口测试"
 else
-    message1_4=
+    message1_5=
 fi
 
 pcislotenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step11.enable')"
 if [ $pcislotenable -eq 1 ]
 then
-    message1_5="PCIE插槽设备测试"
+    message1_6="PCIE插槽设备测试"
 else
-    message1_5=
+    message1_6=
 fi
 
 serialenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step1.enable')"
 if [ $serialenable -eq 1 ]
 then
-    message1_6="串行接口测试"
+    message1_7="串行接口测试"
 else
-    message1_6=
+    message1_7=
 fi
 
 prnenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step13.enable')"
 if [ $prnenable -eq 1 ]
 then
-    message1_7="Paralle"
+    message1_8="并行打印接口设备检测测试"
+else
+    message1_8=
+fi
 
 usbenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step2.enable')"
 if [ $usbenable -eq 1 ]
 then
-    message1_7="USB接口设备检测测试"
+    message1_9="USB接口设备检测测试"
 else
-    message1_7=
+    message1_9=
 fi
 
 usbdatacopyenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step2.datacopy')"
 if [ $usbdatacopyenable -eq 1 ]
 then
-    message1_8="USB接口设数据传输测试"
+    message1_10="USB接口设数据传输测试"
 else
-    message1_8=
+    message1_10=
 fi
 
 memtestenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step12.enable')"
 if [ $memtestenable -eq 1 ]
 then
-    message1_9="内存测试"
+    message1_11="内存稳定性测试"
 else
-    message1_9=
+    message1_11=
 fi
 
 ltpenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step6.enable')"
 if [ $ltpenable -eq 1 ]
 then
-    message1_10="LTP系统压力测试"
+    message1_12="LTP系统压力测试"
 else
-    message1_10=
+    message1_12=
 fi
 
 rebootenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step5.enable')"
 if [ $rebootenable -eq 1 ]
 then
-    message1_11="系统重启测试"
+    message1_13="系统重启测试"
 else
-    message1_11=
+    message1_13=
 fi
 
-zenity --list --title="单板功能测试工具" --text="测试项目" --column="测试项目描述" $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 --width=700 --height=400 --timeout=3
+zenity --list --title="单板功能测试工具" --text="测试项目" --column="测试项目描述" $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13 --width=700 --height=500 --timeout=20
 
 if [ $? -eq 1 -o $? -eq -1 ]
 then
     exit 1
 fi
 
-echo "[INFO]:[Global]:[]:[testing items are $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11]" >> "$RESULTPATH/$fileprefix.log"
+echo "[INFO]:[Global]:[]:[testing items are $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13]" >> "$RESULTPATH/$fileprefix.log"
 
 # ============================================================================
 # cpu mem pci info
@@ -236,6 +253,19 @@ echo "[INFO]:[General]:[Memory]:[" >> "$RESULTPATH/$fileprefix.log"
 cat /proc/meminfo >> "$RESULTPATH/$fileprefix.log"
 echo "]" >> "$RESULTPATH/$fileprefix.log"
 
+sysmemdef="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step14.memnum')"
+sysmemnum="$(cat /proc/meminfo | grep MemTotal | grep -Po "[0-9]*")"
+if [ $sysmemnum -gt $sysmemdef ]
+then
+    echo "[信息]:[通用]:[内存]:[系统内存 $sysmemum 检测正常]"
+    echo "[INFO]:[General]:[Mem]:[system memory $sysmemnum normal]"
+    sysmemtestok=TRUE
+else
+    echo "[错误]:[通用]:[内存]:[系统内存 $sysmemnum 检测错误]"
+    echo "[ERROR]:[General]:[Mem]:[system memory $sysmemnum error]"
+    sysmemtestok=FALSE
+fi
+
 echo "[INFO]:[General]:[PCI]:[" >> "$RESULTPATH/$fileprefix.log"
 lspci >> "$RESULTPATH/$fileprefix.log"
 echo "]" >> "$RESULTPATH/$fileprefix.log"
@@ -249,12 +279,12 @@ then
     audioplaytime="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step9.playtime')"
     audiorectime="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step9.rectime')"
     audiotottime=`expr $audiorectime \* 2`
-    echo "[信息]:[音频功能]:[]:[音频功能测试,测试大约需要 $audiotottime 秒]"
+    echo "[信息]:[音频功能]:[]:[音频第一接口功能测试,测试大约需要 $audiotottime 秒]"
     if [ -f "$REALDIR/$DATAPATH/$WAVFILE" ]
     then
         aplay -d "$audioplaytime" "$REALDIR/$DATAPATH/$WAVFILE" &
     else
-        echo "[警告]:[音频功能]:[音频播放测试文件不存在，忽略音频播放]"
+        echo "[警告]:[音频功能]:[]:[音频播放测试文件不存在，忽略音频播放]"
         echo "[WARN]:[Audio]:[]:[Audo playback data file does not exist, ignore audio playback]" >> "$RESULTPATH/$fileprefix.log"
     fi
 
@@ -262,6 +292,48 @@ then
     sleep 2
     echo "[信息]:[音频功能]:[]:[播放录制音频文件。。。]"
     aplay -d "$audiorectime" "$RESULTPATH/audio$fileprefix.mov"
+   
+    zenity --question --width=700 --title="音频第一接口测试" --text="您是否正确听到播放和录制音频" --timeout=10
+    if [ $? -eq 1 -o $? -eq -1 ]
+    then
+        audiotestok=FALSE
+        echo "[错误]:[音频功能]:[]:[音频第一接口播放或录制异常]"
+        echo "[ERROR]:[Audio]:[]:[Audio 1st interface playback or record error]" >> "$RESULTPATH/$fileprefix.log"
+    else
+        echo "[信息]:[音频功能]:[]:[音频第一接口播放或录制正常]"
+        echo "[INFO]:[Audio]:[]:[Audio 1st interface playback or record succeeds]" >> "$RESULTPATH/$fileprefix.log"
+    fi
+
+    audio2ndintf="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step9.intfsec')"
+    if [ $audio2ndintf -eq 1 ]
+    then
+        sleep 10
+        echo "[信息]:[音频功能]:[]:[音频第二接口功能测试,测试大约需要 $audiotottime 秒]"
+        if [ -f "$REALDIR/$DATAPATH/$WAVFILE" ]
+        then
+            aplay -d "$audioplaytime" "$REALDIR/$DATAPATH/$WAVFILE" &
+        else
+            echo "[警告]:[音频功能]:[音频播放测试文件不存在，忽略音频播放]"
+            echo "[WARN]:[Audio]:[]:[Audo playback data file does not exist, ignore audio playback]" >> "$RESULTPATH/$fileprefix.log"
+        fi
+
+        arecord -f cd -d "$audiorectime" "$RESULTPATH/audio2ndintf$fileprefix.mov"
+        sleep 2
+        echo "[信息]:[音频功能]:[]:[播放录制音频文件。。。]"
+        aplay -d "$audiorectime" "$RESULTPATH/audio2ndintf$fileprefix.mov"
+
+        zenity --question --width=700 --title="音频第二接口测试" --text="您是否正确听到播放和录制音频" --timeout=10
+        if [ $? -eq 1 -o $? -eq -1 ]
+        then
+            audiotestok=FALSE
+            echo "[错误]:[音频功能]:[]:[音频第二接口播放或录制异常]"
+            echo "[ERROR]:[Audio]:[]:[Audio 2nd interface playback or record error]" >> "$RESULTPATH/$fileprefix.log"
+        else
+            echo "[信息]:[音频功能]:[]:[音频第二接口播放或录制正常]"
+            echo "[INFO]:[Audio]:[]:[Audio 2nd interface playback or record succeeds]" >> "$RESULTPATH/$fileprefix.log"
+        fi
+    fi
+
 else
     audiotestok=
     echo "[信息]:[音频功能]:[]:[音频功能测试禁止]" 
@@ -275,23 +347,23 @@ if [ $eth1enable -eq 1 ]
 then
     eth1server="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step7.server')"
 #   echo $eth1server
-    echo "以太网1功能测试。。。"
+    echo "[信息]:[以太网1]:[]:[以太网1功能测试。。。]"
 
     ping -c 5 $eth1server
 
     if [ $? -eq 0 ]
     then
         eth1testok=TRUE
-        echo "以太网1 PING 功能测试正常"
-        echo "ethernet1 ping ok" >> "$RESULTPATH/$fileprefix.log"
+        echo "[信息]:[以太网1]:[]:[以太网1 PING 功能测试正常]"
+        echo "[INFO]:[ethernet1]:[]:[Ethernet 1 ping ok]" >> "$RESULTPATH/$fileprefix.log"
     else
         eth1testok=FALSE
-        echo "以太网1 PING 功能测试错误"
-        echo "ethernet1 ping error" >> "$RESULTPATH/$fileprefix.log"
+        echo "[错误]:[以太网1]:[]:[以太网1PING 功能测试错误]"
+        echo "[ERROR]:[ethernet1]:[]:[Ethernet 1 ping error]" >> "$RESULTPATH/$fileprefix.log"
     fi
 else
     eth1testok=
-    echo "以太网1功能测试禁止"
+    echo "[信息]:[以太网1]:[]:[以太网1功能测试禁止]"
 fi
 
 
@@ -300,67 +372,67 @@ if [ $eth2enable -eq 1 ]
 then
     eth2server="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step8.server')"
 #   echo $eth2server
-    echo "以太网2功能测试。。。"
+    echo "[信息]:[以太网2]:[]:[以太网2功能测试。。。]"
 
     ping -c 5 $eth2server
 
     if [ $? -eq 0 ]
     then
         eth2testok=TRUE
-        echo "以太网2 PING 功能测试正常"
-        echo "ethernet2 ping ok" >> "$RESULTPATH/$fileprefix.log"
+        echo "[信息]:[以太网2]:[]:[以太网2 PING 功能测试正常]"
+        echo "[INFO]:[ethernet2]:[]:[Ethernet 2 ping ok]" >> "$RESULTPATH/$fileprefix.log"
     else
         eth2testok=FALSE
-        echo "以太网2 PING 功能测试错误"
-        echo "ethernet2 ping error" >> "$RESULTPATH/$fileprefix.log"
+        echo "[错误]:[以太网2]:[]:[以太网2 PING 功能测试错误]"
+        echo "[ERROR]:[ethernet2]:[]:Ethernet 2 ping error]" >> "$RESULTPATH/$fileprefix.log"
     fi
 else
     eth2testok=
-    echo "以太网2功能测试禁止"
+    echo "[信息]:[以太网2]:[]:[以太网2功能测试禁止]"
 fi
 
 # =============================================================================
 # pcie slot test
 if [ $pcislotenable -eq 1 ]
 then
-    echo "PCIE插槽设备检测"
+    echo "[信息]:[PCIE插槽]:[]:[PCIE插槽设备检测...]"
     pcislotno="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step11.slot')"
     pcislotnum="$(lspci -s $pcislotno | wc -l)"
     if [ $pcislotnum -eq 1 ]
     then
         pcislottestok=TRUE
-        echo "PCIE插槽设备检测正常"
-        echo "pcie slot device detection normal" >> "$RESULTPATH/$fileprefix.log"
+        echo "[信息]:[PCIE插槽]:[]:[PCIE插槽设备检测正常]"
+        echo "[INFO]:[PCIE slot]:[]:[pcie slot device detection normal]" >> "$RESULTPATH/$fileprefix.log"
     else
         pcislottestok=FALSE
-        echo "PCIE插槽设备检测失败"
-        echo "pcie slot device detection error" >> "$RESULTPATH/$fileprefix.log"
+        echo "[错误]:[PCIE插槽]:[]:[PCIE插槽设备检测失败]"
+        echo "[ERROR]:[PCIE slot]:[]:[pcie slot device detection error]" >> "$RESULTPATH/$fileprefix.log"
     fi    
 else
     pcislottestok=
-    echo "PCIE插槽设备检测功能禁止"
+    echo "[信息]:[PCIE插槽]:[]:[PCIE插槽设备检测功能禁止]"
 fi
 
 # ==============================================================================
 # 2nd sata interface test
 if [ $sataenable -eq 1 ]
 then
-    echo "SATA第二接口设备检测。。。"
+    echo "[信息]:[SATA第二接口]:[]:[SATA第二接口设备检测。。。]"
     sata2ndblknum="$(lsblk -l -o name | grep -E "sdb1" | wc -l)"
     # echo $sata2ndblknum
     if [ $sata2ndblknum -eq 1 ]
     then
         satatestok=TRUE
-        echo "SATA第二接口设备检测正常"
-        echo "SATA 2nd interface device detection normal" >> "$RESULTPATH/$fileprefix.log"
+        echo "[信息]:[SATA第二接口]:[]:[SATA第二接口设备检测正常]"
+        echo "[INFO]:[SATA 2nd interface]:[]:[SATA 2nd interface device detection normal" >> "$RESULTPATH/$fileprefix.log"
     else
         satatestok=FALSE
-        echo "SATA第二接口设备检测失败"
-        echo "SATA 2nd interface device detection error" >> "$RESULTPATH/$fileprefix.log"
+        echo "[错误]:[SATA第二接口]:[]:[SATA第二接口设备检测失败]"
+        echo "[ERROR]:[SATA 2nd interface]:[]:[SATA 2nd interface device detection error]" >> "$RESULTPATH/$fileprefix.log"
     fi
 else
     satatestok=
-    echo "SATA第二接口设备检测禁止"
+    echo "[信息]:[SATA第二接口]:[]:[SATA第二接口设备检测禁止]"
 fi
 
 
@@ -373,8 +445,8 @@ then
     serialnum="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step1.number')"
     serialtottime=`expr $serialtime + 15 + 4`
     serialrxtime=`expr $serialtime + 5`
-    echo "串口功能测试。。。"
-    echo "时间大约需要" $serialtottime "秒"
+    echo "[信息]:[串口]:[]:[串口功能测试。。。]"
+    echo "[信息]:[串口]:[]:[串口功能测试时间大约需要 $serialtottime 秒]"
 
     temploop=0
     
@@ -382,39 +454,42 @@ then
     port=($porttemp)
 
     # serial interrupt affinity configuration, require root 
-    tempirq=0
-    tempirq1=0
-    irqset=10
-    tempdata=0
-    while [ $tempirq -lt $serialnum ]
-    do
-        if [[ ${port[$tempirq]} == "/dev/ttyAMA"* ]] ; then
-            
-            $REALDIR/serial -s -e -p ${port[$tempirq]} -b 115200 -w 128 -a 50 -i 2 -o 1 -f "$RESULTPATH/logserialtemp.log" -g "$RESULTPATH/resserialtemp.log"  >/dev/null 2>/dev/null
-            irqset=`expr $irqset + $tempirq1`
-            tempdata=`expr $(($tempirq1 + 1)) \* 2`
-            tempirq1=`expr $tempirq1 + 1`
-            # echo $tempirq1  $tempdata
-            # echo $irqset
-            echo $tempdata > "/proc/irq/$irqset/smp_affinity"
-        fi
+    # temporary disable serial irq affinity since no usage Jul09
 
-        tempirq=`expr $tempirq + 1`
-    done
+    # tempirq=0
+    # tempirq1=0
+    # irqset=10
+    # tempdata=0
+    # while [ $tempirq -lt $serialnum ]
+    # do
+    #    if [[ ${port[$tempirq]} == "/dev/ttyAMA"* ]] ; then
+            
+    #        $REALDIR/serial -s -e -p ${port[$tempirq]} -b 115200 -w 128 -a 50 -i 2 -o 1 -f "$RESULTPATH/logserialtemp.log" -g "$RESULTPATH/resserialtemp.log"  >/dev/null 2>/dev/null
+    #        irqset=`expr $irqset + $tempirq1`
+    #        tempdata=`expr $(($tempirq1 + 1)) \* 2`
+    #        tempirq1=`expr $tempirq1 + 1`
+    #        # echo $tempirq1  $tempdata
+    #        # echo $irqset
+    #        echo $tempdata > "/proc/irq/$irqset/smp_affinity"
+    #    fi
+
+    #    tempirq=`expr $tempirq + 1`
+    # done
+    
     # end of interrupt affinity
 
     while [ $temploop -lt $serialnum ]
     do
         # echo ${port[$temploop]}
         if [[ ${port[$temploop]} == "/dev/ttyAMA"* ]] ; then
-            echo "飞腾内置串口测试"
+            echo "[信息]:[串口]:[]:[飞腾内置串口测试]"
             sleep $serialrxtime
-            echo "ft2000 internal serial testing" >> "$RESULTPATH/$fileprefix.log"
+            echo "[INFO]:[Serial]:[]:[ft2000 internal serial testing]" >> "$RESULTPATH/$fileprefix.log"
             gnome-terminal -- /bin/bash -c "$REALDIR/serial -s -e -p ${port[$temploop]} -b 115200 -w 128 -a 70 -i $serialrxtime -o $serialtime -f "$RESULTPATH/log$temploop.log" -g "$RESULTPATH/res$temploop.log"; exec bash"
             # sleep 1
         else
-            echo "PCIE转接串口测试"
-            echo "pcie to serial port testing" >> "$RESULTPATH/$fileprefix.log"
+            echo "[信息]:[串口]:[]:[PCIE或USB转接串口测试]"
+            echo "[INFO]:[Serial]:[]:[pcie/usb to serial port testing]" >> "$RESULTPATH/$fileprefix.log"
             gnome-terminal -- /bin/bash -c "$REALDIR/serial -s -e -p ${port[$temploop]} -b 115200 -w 512 -i $serialrxtime -o $serialtime -f "$RESULTPATH/log$temploop.log" -g "$RESULTPATH/res$temploop.log"; exec bash"
             sleep 1
         fi
@@ -434,9 +509,11 @@ then
         if [ $serialresult -ne 0 ]
         then
             serialtestok=FASLE
-            echo $temploop1 "串口测试错误"
+            echo "[错误]:[串口]:[]:[$temploop1 串口测试错误]"
+            echo "[ERROR]:[Serial]:[]:[$temploop1 serial testing error]" >> "$RESULTPATH/$fileprefix.log"
         else
-            echo $temploop1 "串口测试正常"
+            echo "[信息]:[串口]:[]:[$temploop1 串口测试正常]"
+            echo "[INFO]:[Serial]:[]:[$temploop1 serial testing succeeds]" >> "$RESULTPATH/$fileprefix.log"
         fi
 
         cat "$RESULTPATH/log$temploop1.log" >> "$RESULTPATH/$fileprefix.log"
@@ -451,7 +528,26 @@ then
    # echo $serialtestresult >> "/home/$USERNAME/$RESULTPATH/$fileprefix.log"
 else
     serialtestok=
-    echo "串口功能测试禁止"
+    echo "[信息]:[串口]:[]:[串口功能测试禁止]"
+fi
+
+# =============================================================================
+# prn test
+if [ $prnenable -eq 1 ]
+then
+    echo "[信息]:[打印并口]:[]:[打印并口功能检测]"
+    if [ ! -f "/dev/usb/lp0" ] ; then
+        echo "[错误]:[打印并口]:[]:[打印并口检测失败]"
+        echo "[ERROR]:[PRN Interface]:[]:[prn interface detection error]" >> "$RESULTPATH/$fileprefix.log"
+        prntestok=FASLE
+    else
+        echo "[信息]:[打印并口]:[]:[打印并口检测正常]"
+        echo "[INFO]:[PRN Interface]:[]:[prn interface detection succeeds]" >> "$RESULTPATH/$fileprefix.log"
+        prntestok=TRUE
+    fi
+else
+    prntestok=
+    echo "[信息]:[打印并口]:[]:[打印并口检测功能禁止]"
 fi
 
 # ==============================================================================
@@ -470,7 +566,7 @@ then
     # echo $usb2disknum
 
     usbdisktemp=`expr $usb3disknum + $usb2disknum`
-    echo "USB接口配置设备数量是" $usbdisktemp
+    # echo "USB接口配置设备数量是" $usbdisktemp
 
 
     # if sata interface check
@@ -506,7 +602,7 @@ then
     then
         timetotal=`expr $usb3disknum \* 10 + $usb2disknum \* 27`
         # echo $timetotal
-        echo "USB接口设备数据传输测试。。。大约需要" $timetotal "秒"
+        echo "[信息]:[USB接口设备数据传输]:[]:[USB接口设备数据传输测试。。。大约需要 $timetotal 秒]"
         timereal=0
 
         if [ $sataenable -eq 1 ]
@@ -573,7 +669,7 @@ then
 else
     usbtestok=
     echo "[信息]:[USB接口]:[]:[USB接口测试禁止]"
-    echo "[INFO]:[USB interface]:[]:[USb interface function test disable]"
+    # echo "[INFO]:[USB interface]:[]:[USb interface function test disable]"
 fi
 
 # ======================================================================================
@@ -586,15 +682,15 @@ then
     memtester $memtestsize $memtesttime
     if [ $? -ne 0 ]; then
         memtestok=FALSE
-        echo "内存测试失败"
-        echo "memtest $memtestsize $memtesttime error" >> "$RESULTPATH/$fileprefix.log"
+        echo "[错误]:[内存稳定]:[]:[内存稳定测试失败]"
+        echo "[ERROR]:[memory stability]:[]:[memtest $memtestsize $memtesttime error]" >> "$RESULTPATH/$fileprefix.log"
     else
-        echo "内存测试正常"
-        echo "memtest $memtestsize $memtesttime normal" >> "$RESULTPATH/$fileprefix.log"
+        echo "[信息]:[内存稳定]:[]:[内存稳定测试正常]"
+        echo "[INFO]:[memory stability]:[]:[memtest $memtestsize $memtesttime succeeds]" >> "$RESULTPATH/$fileprefix.log"
     fi
 else
     memtestok=
-    echo "内存测试禁止"
+    echo "[信息]:[内存稳定]:[]:[内存稳定测试禁止]"
 fi
 
 # ======================================================================================
@@ -620,7 +716,7 @@ if [ $logfileupload -eq 1 ]
 then
     echo "上传记录文件至服务器"
     atftp -p -l "$RESULTPATH/$fileprefix.log" -r "$fileprefix.log" $gserver
-    atftp -p -l "$RESULTPATH/audio$fileprefix.mov" -r "audio$fileprefix.mov" $gserver
+    #  atftp -p -l "$RESULTPATH/audio$fileprefix.mov" -r "audio$fileprefix.mov" $gserver
 else
     echo "记录文件不上传"
 fi
@@ -628,12 +724,12 @@ fi
 # =========================================================================================
 testtype="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testtype')"
 if [ $testtype = "stability" ] ; then
-    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $audiotestok $message1_1 $eth1testok $message1_2 $eth2testok $message1_3 $satatestok $message1_4 $pcislottestok $message1_5 $serialtestok $message1_6 $usbtestok $message1_7 $usbdatacopytestok $message1_8 $memtestok $message1_9 $ltptestok $message1_10 --width=700 --height=400 --timeout=10
+    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12 --width=700 --height=500 --timeout=10
 else
-    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $audiotestok $message1_1 $eth1testok $message1_2 $eth2testok $message1_3 $satatestok $message1_4 $pcislottestok $message1_5 $serialtestok $message1_6 $usbtestok $message1_7 $usbdatacopytestok $message1_8 $memtestok $message1_9 $ltptestok $message1_10 --width=700 --height=400
+    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12 --width=700 --height=500
 fi
 
-echo "[INFO]:[Global]:[]:[$audiotestok $message1_1 $eth1testok $message1_2 $eth2testok $message1_3 $satatestok $message1_4 $pcislottestok $message1_5 $serialtestok $message1_6 $usbtestok $message1_7 $usbdatacopytestok $message1_8 $memtestok $message1_9 $ltptestok $message1_10]" >> "$RESULTPATH/$fileprefix.log"
+echo "[INFO]:[Global]:[]:[$sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12]" >> "$RESULTPATH/$fileprefix.log"
 
 # ========================================================================================
 # reboot test
