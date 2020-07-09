@@ -33,19 +33,13 @@ if [ ! -f "$REALDIR/$CONFPATH/$CONFFILE" ]; then
     exit 1
 fi
 
-
-#if [ ! -f "$REALDIR/$DATAPATH/$WAVFILE" ]; then
-#    echo "[错误]:[全局配置]:[]:[没有检测到测试数据文件，请检查,测试程序即将退出]"
-#    sleep 5
-#    exit 1
-# fi
-
 netdev="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.netdev')"
 if [ $netdev = "null" ] ; then
     echo "[错误]:[全局配置]:[]:[没有检测到全局网络接口配置，请检查，测试程序即将退出]"
     sleep 5
     exit 1
 fi
+
 eth1macaddr="$(LANG=C ifconfig $netdev | grep -Po 'HWaddr \K.*$' | tr -d ':')"
 if [ -z $eth1macaddr ] ; then
     echo "[错误]:[全局配置]:[]:[配置全局网络接口获取设备信息错误，请检查，测试程序即将退出]"
@@ -162,6 +156,11 @@ then
 else
     message1_6=
 fi
+
+prnenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step13.enable')"
+if [ $prnenable -eq 1 ]
+then
+    message1_7="Paralle"
 
 usbenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step2.enable')"
 if [ $usbenable -eq 1 ]
