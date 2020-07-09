@@ -1,6 +1,4 @@
 #!/bin/bash
-    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $audiotestok $message1_1 $eth1testok $message1_2 $eth2testok $message1_3 $satatestok $message1_4 $pcislottestok $message1_5 $serialtestok $message1_6 $usbtestok $message1_7 $usbdatacopytestok $message1_8 $memtestok $message1_9 $ltptestok $message1_10 --width=700 --height=400
-
 # ============================================================================
 # global config
 
@@ -220,7 +218,7 @@ else
     message1_13=
 fi
 
-zenity --list --title="单板功能测试工具" --text="测试项目" --column="测试项目描述" $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13 --width=700 --height=500 --timeout=20
+zenity --list --title="单板功能测试工具" --text="测试项目" --column="测试项目描述" $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13 --width=700 --height=500 --timeout=5
 
 if [ $? -eq 1 -o $? -eq -1 ]
 then
