@@ -252,17 +252,22 @@ echo "[INFO]:[General]:[Memory]:[" >> "$RESULTPATH/$fileprefix.log"
 cat /proc/meminfo >> "$RESULTPATH/$fileprefix.log"
 echo "]" >> "$RESULTPATH/$fileprefix.log"
 
-sysmemdef="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step14.memnum')"
-sysmemnum="$(cat /proc/meminfo | grep MemTotal | grep -Po "[0-9]*")"
-if [ $sysmemnum -gt $sysmemdef ]
-then
-    echo "[信息]:[通用]:[内存]:[系统内存 $sysmemum 检测正常]"
-    echo "[INFO]:[General]:[Mem]:[system memory $sysmemnum normal]"
-    sysmemtestok=TRUE
+if [ $sysmemenable -eq 1 ] ; then
+    sysmemdef="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step14.memnum')"
+    sysmemnum="$(cat /proc/meminfo | grep MemTotal | grep -Po "[0-9]*")"
+    if [ $sysmemnum -gt $sysmemdef ]
+    then
+        echo "[信息]:[通用]:[内存]:[系统内存 $sysmemum 检测正常]"
+        echo "[INFO]:[General]:[Mem]:[system memory $sysmemnum normal]"
+        sysmemtestok=TRUE
+    else
+        echo "[错误]:[通用]:[内存]:[系统内存 $sysmemnum 检测错误]"
+        echo "[ERROR]:[General]:[Mem]:[system memory $sysmemnum error]"
+        sysmemtestok=FALSE
+    fi
 else
-    echo "[错误]:[通用]:[内存]:[系统内存 $sysmemnum 检测错误]"
-    echo "[ERROR]:[General]:[Mem]:[system memory $sysmemnum error]"
-    sysmemtestok=FALSE
+    sysmemtestok=
+    echo "[信息]:[系统内存容量检测]:[]:[系统内存容量检测功能禁止]" 
 fi
 
 echo "[INFO]:[General]:[PCI]:[" >> "$RESULTPATH/$fileprefix.log"
