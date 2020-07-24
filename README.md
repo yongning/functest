@@ -17,3 +17,8 @@ Testing depends following components
 - ltp (old and micro modified, in dep dir)
 
 Desktop shortcut in data dir
+
+in conf/test2.conf file, special testtype
+testtype = stability => mainly for long time memory/ltp/reboot test case, reboot test will automatically start after ltp test
+testtype = pcie2usb => only for pcie to usb device stability test case, reboot + pcie2usb device num test
+testtype = function => normal functional test

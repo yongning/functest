@@ -6,6 +6,8 @@ CONFFILE="/opt/functest/conf/test2.conf"
 USERNAME="$(cat $CONFFILE | jq -r '.global.username')"
 [ $USERNAME != "null" ] && RESULTPATH="$RESULTPATH/$USERNAME"
 
+TESTTYPE="$(cat $CONFFILE | jq -r '.global.testtype')"
+
 rebootnumdef="$(cat $CONFFILE | jq -r '.step5.number')"
 # echo $rebootnumdef
 
@@ -29,6 +31,22 @@ else
     echo $rebootcurnum > "$RESULTPATH/$monthday$timetemp.log"
     sync "$RESULTPATH/$monthday$timetemp.log"
     sync "RESULTPATH/rebootnum.data"
+
+    if [ $TESTTYPE = "pcie2usb" ] ; then
+        pcieusbnum="$(lspci | grep uPD720201 | wc -l)"
+        if [ $pcieusbnum != 4 ] ; then
+            pcieusbresult="pcieusbexcep"
+        else
+            pcieusbresult="pcieusbok"
+        fi    
+    else
+        pcieusbresult="pcieusbok"
+    fi
+
+fi
+
+if [ $pcieusbresult = "pcieusbexcep" ] ; then
+    exit 0
 fi
 
 if [ $rebootcurnum -gt $rebootnumdef ]
@@ -57,6 +75,7 @@ then
 #    chmod 777 /root/.config/autostart/.desktop
 #    sleep 5
 else
+   sleep 5
    reboot
 fi
 
