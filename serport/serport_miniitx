@@ -1,0 +1,85 @@
+#! /bin/bash
+
+port1="$(ls -l /sys/dev/char/188:0 | grep -o "3-4\.[1-4]" | head -1)"
+echo $port1
+portnum1=${port1:4:1}
+echo $portnum1
+case $portnum1 in
+1)
+    ln -s /dev/ttyUSB0 /dev/COM0
+    ln -s /dev/ttyUSB1 /dev/COM1
+    ln -s /dev/ttyUSB2 /dev/COM2
+    ln -s /dev/ttyUSB3 /dev/COM3
+    ;;
+2)
+    ln -s /dev/ttyUSB0 /dev/COM4
+    ln -s /dev/ttyUSB1 /dev/COM5
+    ln -s /dev/ttyUSB2 /dev/COM6
+    ln -s /dev/ttyUSB3 /dev/COM7
+    ;;
+3)
+    ln -s /dev/ttyUSB0 /dev/COM8
+    ln -s /dev/ttyUSB1 /dev/COM9
+    ln -s /dev/ttyUSB2 /dev/COM10
+    ln -s /dev/ttyUSB3 /dev/COM11
+    ;;
+*)
+    echo "tty usb port" $portnum1 "error"
+    ;;
+esac
+
+port2="$(ls -l /sys/dev/char/188:4 | grep -o "3-4\.[1-4]" | head -1)"
+echo $port2
+portnum2=${port2:4:1}
+echo $portnum2
+case $portnum2 in
+1)
+    ln -s /dev/ttyUSB4 /dev/COM0
+    ln -s /dev/ttyUSB5 /dev/COM1
+    ln -s /dev/ttyUSB6 /dev/COM2
+    ln -s /dev/ttyUSB7 /dev/COM3
+    ;;
+2)
+    ln -s /dev/ttyUSB4 /dev/COM4
+    ln -s /dev/ttyUSB5 /dev/COM5
+    ln -s /dev/ttyUSB6 /dev/COM6
+    ln -s /dev/ttyUSB7 /dev/COM7
+    ;;
+3)
+    ln -s /dev/ttyUSB4 /dev/COM8
+    ln -s /dev/ttyUSB5 /dev/COM9
+    ln -s /dev/ttyUSB6 /dev/COM10
+    ln -s /dev/ttyUSB7 /dev/COM11
+    ;;
+*)
+    echo "tty usb port" $portnum2 "error"
+    ;;
+esac
+
+port3="$(ls -l /sys/dev/char/188:8 | grep -o "3-4\.[1-4]" | head -1)"
+echo $port3
+portnum3=${port3:4:1}
+echo $portnum3
+case $portnum3 in
+1)
+    ln -s /dev/ttyUSB8 /dev/COM0
+    ln -s /dev/ttyUSB9 /dev/COM1
+    ln -s /dev/ttyUSB10 /dev/COM2
+    ln -s /dev/ttyUSB11 /dev/COM3
+    ;;
+2)
+    ln -s /dev/ttyUSB8 /dev/COM4
+    ln -s /dev/ttyUSB9 /dev/COM5
+    ln -s /dev/ttyUSB10 /dev/COM6
+    ln -s /dev/ttyUSB11 /dev/COM7
+    ;;
+3)
+    ln -s /dev/ttyUSB8 /dev/COM8
+    ln -s /dev/ttyUSB9 /dev/COM9
+    ln -s /dev/ttyUSB10 /dev/COM10
+    ln -s /dev/ttyUSB11 /dev/COM11
+    ;;
+*)
+    echo "tty usb port" $portnum3 "error"
+    ;;
+esac
