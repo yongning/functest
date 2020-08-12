@@ -1,6 +1,13 @@
 #!/bin/bash
 # ============================================================================
 # global config
+function zenerror {
+    if [ $zenerrorenable -eq 1 ] ; then
+        zenity --error --text="$errormsg" --width=600 --height=200
+        exit 1
+    fi
+}
+
 
 _uid="$(id -u)"
 if [ $_uid -ne 0 ]
@@ -117,7 +124,7 @@ fi
 sysmemenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step14.enable')"
 if [ $sysmemenable -eq 1 ]
 then
-    message1_1="系统内存检测测试"
+    message1_1="系统内存容量和系统日期检测测试"
 else
     message1_1=
 fi
@@ -227,6 +234,13 @@ fi
 
 echo "[INFO]:[Global]:[]:[testing items are $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13]" >> "$RESULTPATH/$fileprefix.log"
 
+testtypetmp="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testtype')"
+if [ $testtypetmp = 'factfunc' ] ; then
+    zenerrorenable=1
+else
+    zenerrorenable=0
+fi
+
 # ============================================================================
 # cpu mem pci info
 echo "[INFO]:[General]:[]:[" >> "$RESULTPATH/$fileprefix.log"
@@ -245,6 +259,8 @@ if [ $cpunum1 -eq $cpunum2 ] && [ $cpunum1 -eq 4 ]; then
 else
     echo "[错误]:[通用]:[CPU]:[CPU类型和数量检测错误]"
     echo "[ERROR]:[General]:[CPU]:[cpu type and core number error]" >> "$RESULTPATH/$fileprefix.log"
+    errormsg="错误 CPU类型或者数量检测错误"
+    zenerror
 fi
 
 # mem test required?
@@ -258,16 +274,35 @@ if [ $sysmemenable -eq 1 ] ; then
     if [ $sysmemnum -gt $sysmemdef ]
     then
         echo "[信息]:[通用]:[内存]:[系统内存 $sysmemum 检测正常]"
-        echo "[INFO]:[General]:[Mem]:[system memory $sysmemnum normal]"
+        echo "[INFO]:[General]:[Mem]:[system memory $sysmemnum normal]" >> "$RESULTPATH/$fileprefix.log"
         sysmemtestok=TRUE
     else
         echo "[错误]:[通用]:[内存]:[系统内存 $sysmemnum 检测错误]"
-        echo "[ERROR]:[General]:[Mem]:[system memory $sysmemnum error]"
+        echo "[ERROR]:[General]:[Mem]:[system memory $sysmemnum error]" >> "$RESULTPATH/$fileprefix.log"
         sysmemtestok=FALSE
+        errormsg="错误 系统内存检测错误"
+        zenerror
     fi
+
+    systimedef="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step14.date')"
+    systimenow="$(date "+%Y%m")"
+    echo $systimedef
+    echo $systimenow
+    if [ $systimenow -lt $systimedef ] ; then
+        echo "[错误]:[通用]:[系统时间]:[系统时间设定错误]"
+        echo "[ERROR]:[General]:[Time]:[system time $systemnow error]" >> "$RESULTPATH/$fileprefix.log"
+        sysmemtestok=FALSE
+        errormsg="错误 系统当前时间早于设定时间"
+        zenerror
+    else
+        echo "[信息]:[通用]:[系统时间]:[系统时间设定正确]"
+        echo "[INFO]:[General]:[Time]:[System time $systemnow normal]" >> "$RESULTPATH/$fileprefix.log"
+        sysmemtestok=TRUE
+    fi
+
 else
     sysmemtestok=
-    echo "[信息]:[系统内存容量检测]:[]:[系统内存容量检测功能禁止]" 
+    echo "[信息]:[系统内存容量检测]:[]:[系统内存容量和设定时间检测功能禁止]" 
 fi
 
 echo "[INFO]:[General]:[PCI]:[" >> "$RESULTPATH/$fileprefix.log"
@@ -290,6 +325,8 @@ then
     else
         echo "[警告]:[音频功能]:[]:[音频播放测试文件不存在，忽略音频播放]"
         echo "[WARN]:[Audio]:[]:[Audo playback data file does not exist, ignore audio playback]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="警告 音频播放测试文件不存在"
+        zenerror
     fi
 
     arecord -f cd -d "$audiorectime" "$RESULTPATH/audio$fileprefix.mov"
@@ -303,6 +340,8 @@ then
         audiotestok=FALSE
         echo "[错误]:[音频功能]:[]:[音频第一接口播放或录制异常]"
         echo "[ERROR]:[Audio]:[]:[Audio 1st interface playback or record error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 音频第一接口播放或录制错误"        
+        zenerror
     else
         echo "[信息]:[音频功能]:[]:[音频第一接口播放或录制正常]"
         echo "[INFO]:[Audio]:[]:[Audio 1st interface playback or record succeeds]" >> "$RESULTPATH/$fileprefix.log"
@@ -319,6 +358,8 @@ then
         else
             echo "[警告]:[音频功能]:[音频播放测试文件不存在，忽略音频播放]"
             echo "[WARN]:[Audio]:[]:[Audo playback data file does not exist, ignore audio playback]" >> "$RESULTPATH/$fileprefix.log"
+            errormsg="警告 音频播放文件存在"
+            zenerror
         fi
 
         arecord -f cd -d "$audiorectime" "$RESULTPATH/audio2ndintf$fileprefix.mov"
@@ -332,6 +373,8 @@ then
             audiotestok=FALSE
             echo "[错误]:[音频功能]:[]:[音频第二接口播放或录制异常]"
             echo "[ERROR]:[Audio]:[]:[Audio 2nd interface playback or record error]" >> "$RESULTPATH/$fileprefix.log"
+            errormsg="错误 音频第二接口播放或录制错误"
+            zenerror
         else
             echo "[信息]:[音频功能]:[]:[音频第二接口播放或录制正常]"
             echo "[INFO]:[Audio]:[]:[Audio 2nd interface playback or record succeeds]" >> "$RESULTPATH/$fileprefix.log"
@@ -350,6 +393,7 @@ fi
 if [ $eth1enable -eq 1 ]
 then
     eth1server="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step7.server')"
+    eth1devname="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step7.devname')"
 #   echo $eth1server
     echo "[信息]:[以太网1]:[]:[以太网1功能测试。。。]"
 
@@ -364,6 +408,24 @@ then
         eth1testok=FALSE
         echo "[错误]:[以太网1]:[]:[以太网1PING 功能测试错误]"
         echo "[ERROR]:[ethernet1]:[]:[Ethernet 1 ping error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 以太网接口1 PING功能测试错误"
+        zenerror
+    fi
+
+    eth1speed="$(ethtool $eth1devname | grep "Speed: ")"
+    echo $eth1speed
+    eth1speedtmp=${eth1speed:8:4}
+    echo $eth1speedtmp
+    if [ $eth1speedtmp -ne 1000 ] ; then
+        eth1testok=FALSE
+        echo "[错误]:[以太网1]:[]:[以太网接口1速率协商错误]"
+        echo "[ERROR]:[ethernet1]:[]:[Ethernet 1 speed error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 以太网接口1速率协商错误"
+        zenerror
+    else
+        eth1testok=TRUE
+        echo "[信息]:[以太网1]:[]:[以太网1接口速率协商正确]"
+        echo "[INFO]:[ethernet1]:[]:[Ethernet 1 speed right]" >> "$RESULTPATH/$fileprefix.log"
     fi
 else
     eth1testok=
@@ -376,6 +438,7 @@ if [ $eth2enable -eq 1 ]
 then
     eth2server="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step8.server')"
 #   echo $eth2server
+    eth2devname="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step8.devname')"
     echo "[信息]:[以太网2]:[]:[以太网2功能测试。。。]"
 
     ping -c 5 $eth2server
@@ -389,6 +452,24 @@ then
         eth2testok=FALSE
         echo "[错误]:[以太网2]:[]:[以太网2 PING 功能测试错误]"
         echo "[ERROR]:[ethernet2]:[]:Ethernet 2 ping error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 以太网接口2 PING功能测试错误"
+        zenerror
+    fi
+
+    eth2speed="$(ethtool $eth2devname | grep "Speed: ")"
+    echo $eth2speed
+    eth2speedtmp=${eth2speed:8:4}
+    echo $eth2speedtmp
+    if [ $eth2speedtmp -ne 1000 ] ; then
+        eth2testok=FALSE
+        echo "[错误]:[以太网2]:[]:[以太网接口2速率协商错误]"
+        echo "[ERROR]:[ethernet2]:[]:[Ethernet 2 speed error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 以太网接口2速率协商错误"
+        zenerror
+    else
+        eth1testok=TRUE
+        echo "[信息]:[以太网2]:[]:[以太网2接口速率协商正确]"
+        echo "[INFO]:[ethernet2]:[]:[Ethernet 2 speed right]" >> "$RESULTPATH/$fileprefix.log"
     fi
 else
     eth2testok=
@@ -411,6 +492,8 @@ then
         pcislottestok=FALSE
         echo "[错误]:[PCIE插槽]:[]:[PCIE插槽设备检测失败]"
         echo "[ERROR]:[PCIE slot]:[]:[pcie slot device detection error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 PCIE插槽设备检测失败"
+        zenerror
     fi    
 else
     pcislottestok=
@@ -433,6 +516,8 @@ then
         satatestok=FALSE
         echo "[错误]:[SATA第二接口]:[]:[SATA第二接口设备检测失败]"
         echo "[ERROR]:[SATA 2nd interface]:[]:[SATA 2nd interface device detection error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 SATA接口2设备检测失败"
+        zenerror
     fi
 else
     satatestok=
@@ -515,6 +600,8 @@ then
             serialtestok=FASLE
             echo "[错误]:[串口]:[]:[$temploop1 串口测试错误]"
             echo "[ERROR]:[Serial]:[]:[$temploop1 serial testing error]" >> "$RESULTPATH/$fileprefix.log"
+            errormsg="错误 串口数据接收发送测试错误"
+            zenerror
         else
             echo "[信息]:[串口]:[]:[$temploop1 串口测试正常]"
             echo "[INFO]:[Serial]:[]:[$temploop1 serial testing succeeds]" >> "$RESULTPATH/$fileprefix.log"
@@ -544,11 +631,32 @@ then
         echo "[错误]:[打印并口]:[]:[打印并口检测失败]"
         echo "[ERROR]:[PRN Interface]:[]:[prn interface detection error]" >> "$RESULTPATH/$fileprefix.log"
         prntestok=FASLE
+        errormsg="错误 USB转并行打印接口设备检测错误"
+        zenerror
     else
         echo "[信息]:[打印并口]:[]:[打印并口检测正常]"
         echo "[INFO]:[PRN Interface]:[]:[prn interface detection succeeds]" >> "$RESULTPATH/$fileprefix.log"
         prntestok=TRUE
     fi
+    
+    # real print test 
+    sleep 2
+    echo "------------------------------------" > /dev/usb/lp0
+    echo $(LANG=C date) > /dev/usb/lp0
+    echo "$fileprefix" > /dev/usb/lp0
+
+    zenity --question --width=700 --title="打印接口测试" --text="您是否观察到打印机正常打印" --timeout=10
+        if [ $? -eq 1 -o $? -eq -1 ]
+        then
+            audiotestok=FALSE
+            echo "[错误]:[打印并口]:[]:[打印接口实际打印异常]"
+            echo "[ERROR]:[PRN Interface]:[]:[PRN interface print error]" >> "$RESULTPATH/$fileprefix.log"
+            errormsg="错误 打印接口实际打印错误"
+            zenerror
+        else
+            echo "[信息]:[打印并口]:[]:[打印接口实际打印正常]"
+            echo "[INFO]:[PRN Interface]:[]:[Print interface print succeeds]" >> "$RESULTPATH/$fileprefix.log"
+        fi
 else
     prntestok=
     echo "[信息]:[打印并口]:[]:[打印并口检测功能禁止]"
@@ -600,6 +708,8 @@ then
         usbtestok=FALSE
         echo "[错误]:[USB接口检测]:[]:[USB接口设备数量检测错误]"
         echo "[ERROR]:[USB detect]:[]:[$blknum usb interface disk device miss]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 USB接口设备数量检测错误"
+        zenerror
     fi
 
     if [ $usbdatacopyenable -eq 1 ]
@@ -688,6 +798,8 @@ then
         memtestok=FALSE
         echo "[错误]:[内存稳定]:[]:[内存稳定测试失败]"
         echo "[ERROR]:[memory stability]:[]:[memtest $memtestsize $memtesttime error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 内存稳定测试失败"
+        zenerror
     else
         echo "[信息]:[内存稳定]:[]:[内存稳定测试正常]"
         echo "[INFO]:[memory stability]:[]:[memtest $memtestsize $memtesttime succeeds]" >> "$RESULTPATH/$fileprefix.log"
