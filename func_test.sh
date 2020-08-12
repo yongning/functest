@@ -241,6 +241,10 @@ else
     zenerrorenable=0
 fi
 
+if [ $testtypetmp = 'factstable' ] ; then
+    gnome-terminal -- /bin/bash -c "$REALDIR/gpioblink.sh; exec bash"
+fi
+
 # ============================================================================
 # cpu mem pci info
 echo "[INFO]:[General]:[]:[" >> "$RESULTPATH/$fileprefix.log"
@@ -467,7 +471,7 @@ then
         errormsg="错误 以太网接口2速率协商错误"
         zenerror
     else
-        eth1testok=TRUE
+        eth2testok=TRUE
         echo "[信息]:[以太网2]:[]:[以太网2接口速率协商正确]"
         echo "[INFO]:[ethernet2]:[]:[Ethernet 2 speed right]" >> "$RESULTPATH/$fileprefix.log"
     fi
