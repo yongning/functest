@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=factstablebootstrap
+Exec=gonome-terminal -- /bin/bash -c "/opt/functest/func_test.sh"
+X-GNOME-Autostart-enabled=true
