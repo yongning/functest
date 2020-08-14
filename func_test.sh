@@ -242,7 +242,13 @@ else
 fi
 
 if [ $testtypetmp = 'factstable' ] ; then
-    gnome-terminal -- /bin/bash -c "$REALDIR/gpioblink.sh; exec bash"
+    # set pinmux gpio1_b0 to gpio
+    $REALDIR/gpio 0x208 0x30 0x10
+    sleep 0.5
+    $REALDIR/gpioexport.sh
+    sleep 0.5
+    gnome-terminal -- /bin/bash -c "nice -n -10 $REALDIR/gpioblinkshort.sh"
+    rm /root/.config/autostart/pre.desktop
 fi
 
 # ============================================================================
@@ -843,7 +849,7 @@ fi
 
 # =========================================================================================
 testtype="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testtype')"
-if [ $testtype = "stability" ] || [ $testtype = "pcie2usb" ] ; then
+if [ $testtype = "stability" ] || [ $testtype = "pcie2usb" ] || [ $testtype = "factstable" ] ; then
     zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12 --width=700 --height=500 --timeout=10
 else
     zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12 --width=700 --height=500
