@@ -19,11 +19,9 @@ int main(int argc, char** argv)
     unsigned int configdata, configbit;
 
     if (argc < 4) {
-        printf("input parameter error format is pinmux offset configbit configdata\n");
+        printf("input parameter error format is \"pinmux offset configbit configdata\"\n");
         return -1;
     }
-
-    // offset = atoi(argv[1]);
 
     offset = strtoul(argv[1], NULL, 16); 
 
@@ -43,22 +41,20 @@ int main(int argc, char** argv)
         return -1;
     }
     
-    // virt_addr = map_base + 0x0208;
     virt_addr = map_base + offset;
     rdconf = *(unsigned int *)virt_addr;
-    printf(" rd conf is 0x%x at offset 0x%lx \n", rdconf, offset);
+    printf("source config data is 0x%x at offset 0x%lx \n", rdconf, offset);
 
-    // wrconf = rdconf | 0x10;
     wrconf = rdconf & ~configbit;
     wrconf = wrconf | configdata;
     
     *(unsigned int *)virt_addr = wrconf;
 
     rdconf = *(unsigned int *)virt_addr;
-    printf(" rd conf after is 0x%x \n", rdconf);
+    printf("dest config data is 0x%x \n", rdconf);
 
     if (munmap(map_base, MAPSIZE) == -1) {
-        printf(" unmap error \n");
+        printf(" /dev/mem unmap error \n");
         return -1;
     }
 
