@@ -22,3 +22,5 @@ in conf/test2.conf file, special testtype
 testtype = stability => mainly for long time memory/ltp/reboot test case, reboot test will automatically start after ltp test
 testtype = pcie2usb => only for pcie to usb device stability test case, reboot + pcie2usb device num test
 testtype = function => normal functional test
+testtype = factfunc => factory functional test, when error prompt error menu
+testtype = factstable => factory stability test, add gpio1b0 led indication
