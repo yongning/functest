@@ -8,7 +8,6 @@ function zenerror {
     fi
 }
 
-
 _uid="$(id -u)"
 if [ $_uid -ne 0 ]
 then 
@@ -243,11 +242,11 @@ fi
 
 if [ $testtypetmp = 'factstable' ] ; then
     # set pinmux gpio1_b0 to gpio
-    $REALDIR/gpio 0x208 0x30 0x10
+    $REALDIR/gpio/pinmux 0x208 0x30 0x10
     sleep 0.5
-    $REALDIR/gpioexport.sh
+    $REALDIR/gpio/gpio1b0_export.sh
     sleep 0.5
-    gnome-terminal -- /bin/bash -c "nice -n -10 $REALDIR/gpioblinkshort.sh"
+    gnome-terminal -- /bin/bash -c "nice -n -10 $REALDIR/gpio/gpio1b0_500msblink.sh"
     rm /root/.config/autostart/pre.desktop
 fi
 
