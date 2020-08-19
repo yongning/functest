@@ -1,0 +1,7 @@
+# This file under /etc/network directory for config static ip address
+auto "devname"
+iface "devname" inet static
+    address
+    netmask
+    gateway
+    dns-nameservers (optional)
