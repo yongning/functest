@@ -13,11 +13,9 @@
 #define     BIT2            0x4
 #define     BIT7            0x80
 
-static unsigned char bin2bcd (unsigned int val)
-{
-	return (((val / 10) << 4) | (val % 10));
-}
-
+#define     READ_OPS        1
+#define     WRITE_OPS       2
+#define     WRITE_MUL_OPS   3
 int main(int argc, char **argv)
 {
     int                 return_code;
@@ -63,31 +61,24 @@ int main(int argc, char **argv)
             addr = atoi(optarg);
             break;
         case 'v':
-            //value = ss
             sscanf(optarg, "%hhx", &value);
             break;
         case 'd':
-            //value = ss
             sscanf(optarg, "%hhx", &value1);
             break;
         case 'e':
-            //value = ss
             sscanf(optarg, "%hhx", &value2);
             break;
         case 'f':
-            //value = ss
             sscanf(optarg, "%hhx", &value3);
             break;
         case 'g':
-            //value = ss
             sscanf(optarg, "%hhx", &value4);
             break;
         case 'h':
-            //value = ss
             sscanf(optarg, "%hhx", &value5);
             break;
         case 'i':
-            //value = ss
             sscanf(optarg, "%hhx", &value6);
             break;
         }
@@ -97,9 +88,7 @@ int main(int argc, char **argv)
 
     lib_init(0x28007000, 0x1000);
 
-    // open wakeup switch
-    // addr = 1;
-    if (cmd == 0) {
+    if (cmd == READ_OPS) {
         return_code =  i2c_read(EEPROM_SA, addr, 1, &rdvalue, 1);
         if(return_code != 0 )
         {
@@ -107,20 +96,14 @@ int main(int argc, char **argv)
             goto ProcExit;
         }
         printf("i2c1cmd_info readdata is 0x%hhx\n", rdvalue);
-    } else if (cmd == 1) {
-        // printf("\n data is 0x%hhx", value);
-        // if(value != 0x55)
-        // {
-        //    value = 0x55;
+    } else if (cmd == WRITE_OPS) {
             return_code =  i2c_write(EEPROM_SA, addr, 1, &value, 1);
             if(return_code != 0 )
             {
                 printf("i2c1cmd_error write1 addr%d \n", addr);
                 goto ProcExit;
             }
-        
-         // }
-    } else if (cmd == 2) {
+    } else if (cmd == WRITE_MUL_OPS) {
             return_code =  i2c_write(EEPROM_SA, addr, 1, &value1, 1);
             if(return_code != 0 )
             {

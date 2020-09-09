@@ -359,7 +359,9 @@ then
     audio2ndintf="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step9.intfsec')"
     if [ $audio2ndintf -eq 1 ]
     then
-        sleep 10
+        #sleep 10
+        zenity --question --width=700 --title="音频第二接口测试" --text="请接入音频播放和录音设备到第二音频接口，完毕后点击yes键确认"
+
         echo "[信息]:[音频功能]:[]:[音频第二接口功能测试,测试大约需要 $audiotottime 秒]"
         if [ -f "$REALDIR/$DATAPATH/$WAVFILE" ]
         then
@@ -546,6 +548,15 @@ then
     echo "[信息]:[串口]:[]:[串口功能测试。。。]"
     echo "[信息]:[串口]:[]:[串口功能测试时间大约需要 $serialtottime 秒]"
 
+    # delete serial test log file in case remained from last test cycle
+    lastlognum=0
+    while [ $lastlognum -lt $serialnum ]
+    do
+        rm "$RESULTPATH/log$lastlognum.log" 2>/dev/null
+        rm "$RESULTPATH/res$lastlognum.log" 2>/dev/null
+        lastlognum=`expr $lastlognum + 1`
+    done
+
     temploop=0
     
     porttemp="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step1.port[]')"
@@ -649,23 +660,24 @@ then
     fi
     
     # real print test 
-    sleep 2
     echo "------------------------------------" > /dev/usb/lp0
     echo $(LANG=C date) > /dev/usb/lp0
     echo "$fileprefix" > /dev/usb/lp0
 
+    zenity --question --width=700 --title="打印接口测试" --text="准备进行打印操作，请送纸入打印机"
+    
     zenity --question --width=700 --title="打印接口测试" --text="您是否观察到打印机正常打印" --timeout=10
-        if [ $? -eq 1 -o $? -eq -1 ]
-        then
-            audiotestok=FALSE
-            echo "[错误]:[打印并口]:[]:[打印接口实际打印异常]"
-            echo "[ERROR]:[PRN Interface]:[]:[PRN interface print error]" >> "$RESULTPATH/$fileprefix.log"
-            errormsg="错误 打印接口实际打印错误"
-            zenerror
-        else
-            echo "[信息]:[打印并口]:[]:[打印接口实际打印正常]"
-            echo "[INFO]:[PRN Interface]:[]:[Print interface print succeeds]" >> "$RESULTPATH/$fileprefix.log"
-        fi
+    if [ $? -eq 1 -o $? -eq -1 ]
+    then
+        audiotestok=FALSE
+        echo "[错误]:[打印并口]:[]:[打印接口实际打印异常]"
+        echo "[ERROR]:[PRN Interface]:[]:[PRN interface print error]" >> "$RESULTPATH/$fileprefix.log"
+        errormsg="错误 打印接口实际打印错误"
+        zenerror
+    else
+        echo "[信息]:[打印并口]:[]:[打印接口实际打印正常]"
+        echo "[INFO]:[PRN Interface]:[]:[Print interface print succeeds]" >> "$RESULTPATH/$fileprefix.log"
+    fi
 else
     prntestok=
     echo "[信息]:[打印并口]:[]:[打印并口检测功能禁止]"

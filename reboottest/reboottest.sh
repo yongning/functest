@@ -11,6 +11,8 @@ TESTTYPE="$(cat $CONFFILE | jq -r '.global.testtype')"
 rebootnumdef="$(cat $CONFFILE | jq -r '.step5.number')"
 # echo $rebootnumdef
 
+BOARDTYPE="$(cat $CONFFILE | jq -r '.global.boardtype')"
+
 rebootcurnum=0
 
 if [ ! -e "$RESULTPATH/rebootnum.data" ]
@@ -32,14 +34,21 @@ else
     sync "$RESULTPATH/$monthday$timetemp.log"
     sync "RESULTPATH/rebootnum.data"
 
-    if [ $TESTTYPE = "pcie2usb" ] ; then
+    if [[ $TESTTYPE = "pcie2usb" ]] ; then
         pcieusbnum="$(lspci | grep uPD720201 | wc -l)"
         if [ $pcieusbnum != 4 ] ; then
             pcieusbresult="pcieusbexcep"
         else
             pcieusbresult="pcieusbok"
         fi    
-    else
+    else if [[ $BOARDTYPE = "mbc" ]] && [[ $TESTTYPE = "factstable" ]] ; then
+        pcieusbnum="$(lspic | grep uPD720201 | wc -l)"
+        if [[ $pcieusbnum != 4 ]] ; then
+            pcieusbresult="pcieusbexcep"
+        else
+            pcieusbresult="pcieusbok"
+        fi
+    else 
         pcieusbresult="pcieusbok"
     fi
 
