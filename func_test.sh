@@ -665,7 +665,9 @@ then
     echo "$fileprefix" > /dev/usb/lp0
 
     zenity --question --width=700 --title="打印接口测试" --text="准备进行打印操作，请送纸入打印机"
-    
+   
+    sleep 5
+ 
     zenity --question --width=700 --title="打印接口测试" --text="您是否观察到打印机正常打印" --timeout=10
     if [ $? -eq 1 -o $? -eq -1 ]
     then
