@@ -69,7 +69,7 @@ then
         exit 1
     fi
 
-    temp="$("$REALDIR/i2c1cmd" -c 1 -a 34 -v 21)"
+    temp="$("$REALDIR/i2c1cmd" -c 1 -a 34 -v 12)"
     echo $temp
     tmp1="$(echo $temp | grep "i2c1cmd_error" | wc -l)"
     echo $tmp1
@@ -77,7 +77,6 @@ then
         zenity --error --text="单板配置信息烧录错误，您需要重新运行烧录程序"
         exit 1
     fi
-#   "$REALDIR/i2c1cmd" -c 1 -a 34 -v
 fi
 
 if [ $option = "-q" ] ; then

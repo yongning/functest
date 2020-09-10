@@ -68,7 +68,15 @@ then
         zenity --error --text="单板配置信息烧录错误，您需要重新运行烧录程序"
         exit 1
     fi
-#   "$REALDIR/i2c1cmd" -c 1 -a 34 -v
+
+    temp="$("$REALDIR/i2c1cmd" -c 1 -a 34 -v 21)"
+    echo $temp
+    tmp1="$(echo $temp | grep "i2c1cmd_error" | wc -l)"
+    echo $tmp1
+    if [ $tmp1 -ne 0 ] ; then
+        zenity --error --text="单板配置信息烧录错误，您需要重新运行烧录程序"
+        exit 1
+    fi
 fi
 
 if [ $option = "-q" ] ; then
