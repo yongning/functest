@@ -32,26 +32,27 @@ else
     timetemp="$(LANG=C date "+%T" | tr -d ':')"
     echo $rebootcurnum > "$RESULTPATH/$monthday$timetemp.log"
     sync "$RESULTPATH/$monthday$timetemp.log"
-    sync "RESULTPATH/rebootnum.data"
+    sync "$RESULTPATH/rebootnum.data"
 
-    if [[ $TESTTYPE = "pcie2usb" ]] ; then
+    if [ $TESTTYPE = "pcie2usb" ] ; then
         pcieusbnum="$(lspci | grep uPD720201 | wc -l)"
         if [ $pcieusbnum != 4 ] ; then
             pcieusbresult="pcieusbexcep"
         else
             pcieusbresult="pcieusbok"
         fi    
-    else if [[ $BOARDTYPE = "mbc" ]] && [[ $TESTTYPE = "factstable" ]] ; then
-        pcieusbnum="$(lspic | grep uPD720201 | wc -l)"
-        if [[ $pcieusbnum != 4 ]] ; then
-            pcieusbresult="pcieusbexcep"
-        else
-            pcieusbresult="pcieusbok"
-        fi
-    else 
-        pcieusbresult="pcieusbok"
+    else
+        if [ $BOARDTYPE = "mbc" ] && [ $TESTTYPE = "factstable" ] ; then
+            pcieusbnum="$(lspci | grep uPD720201 | wc -l)"
+            if [ $pcieusbnum != 4 ] ; then
+                pcieusbresult="pcieusbexcep"
+            else
+                pcieusbresult="pcieusbok"
+            fi
+         else 
+             pcieusbresult="pcieusbok"
+         fi
     fi
-
 fi
 
 if [ $pcieusbresult = "pcieusbexcep" ] ; then
