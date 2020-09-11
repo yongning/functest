@@ -172,7 +172,7 @@ fi
 
 if [ "X$ethdev" = "Xenaftgm1i1" ]
 then
-    temp="$("$REALDIR/i2c1cmd" -c 3 -a 2 -d "$addr1" -e "$addr2" -f "$addr3" -g "$addr4" -h "$addr5" -i "$addr6")"
+    temp="$("$REALDIR/i2c1cmd" -c 2 -a 9 -d "$addr1" -e "$addr2" -f "$addr3" -g "$addr4" -h "$addr5" -i "$addr6")"
     echo $temp
     tmp1="$(echo $temp | grep "i2c1cmd_error" | wc -l)"
     echo $tmp1

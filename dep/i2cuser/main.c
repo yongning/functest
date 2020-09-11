@@ -13,9 +13,9 @@
 #define     BIT2            0x4
 #define     BIT7            0x80
 
-#define     READ_OPS        1
-#define     WRITE_OPS       2
-#define     WRITE_MUL_OPS   3
+#define     READ_OPS        0
+#define     WRITE_OPS       1
+#define     WRITE_MUL_OPS   2
 int main(int argc, char **argv)
 {
     int                 return_code;

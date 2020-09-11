@@ -707,16 +707,16 @@ then
     # if sata interface check
     if [ $sataenable -eq 1 ]
     then
-        blknum="$(lsblk -l -o name | grep -E "sd[c-r].{1,}" | wc -l)"
+        blknum="$(lsblk -l -o name | grep -E "sd[c-t].{1,}" | wc -l)"
         # echo $blknum
 
-        blkdata="$(lsblk -l -o name | grep -E "sd[c-r].{1,}")"
+        blkdata="$(lsblk -l -o name | grep -E "sd[c-t].{1,}")"
         # echo $blkdata
     else
-        blknum="$(lsblk -l -o name | grep -E "sd[b-q].{1,}" | wc -l)"
+        blknum="$(lsblk -l -o name | grep -E "sd[b-s].{1,}" | wc -l)"
         # echo $blknum
 
-        blkdata="$(lsblk -l -o name | grep -E "sd[b-q].{1,}")"
+        blkdata="$(lsblk -l -o name | grep -E "sd[b-s].{1,}")"
         # echo $blkdata
     fi
 
@@ -744,7 +744,7 @@ then
 
         if [ $sataenable -eq 1 ]
         then
-            lsblk -l -o name | grep -E "sd[c-r].{1,}" | while IFS= read -r line
+            lsblk -l -o name | grep -E "sd[c-t].{1,}" | while IFS= read -r line
             do
                 # echo "$line"
                 devtemp="/dev/""$line"
@@ -764,7 +764,7 @@ then
                 rmdir "$REALDIR/$line"
             done 
         else
-            lsblk -l -o name | grep -E "sd[b-q].{1,}" | while IFS= read -r line
+            lsblk -l -o name | grep -E "sd[b-s].{1,}" | while IFS= read -r line
             do
                 # echo "$line"
                 devtemp="/dev/""$line"
