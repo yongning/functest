@@ -241,12 +241,15 @@ else
 fi
 
 if [ $testtypetmp = 'factstable' ] ; then
+
+    # delete gpio led function during mem/ltp test since currently no usage
     # set pinmux gpio1_b0 to gpio
-    $REALDIR/gpio/pinmux 0x208 0x30 0x10
-    sleep 0.5
-    $REALDIR/gpio/gpio1b0_export.sh
-    sleep 0.5
-    gnome-terminal -- /bin/bash -c "nice -n -10 $REALDIR/gpio/gpio1b0_500msblink.sh"
+    # $REALDIR/gpio/pinmux 0x208 0x30 0x10
+    # sleep 0.5
+    # $REALDIR/gpio/gpio1b0_export.sh
+    # sleep 0.5
+    # gnome-terminal -- /bin/bash -c "nice -n -10 $REALDIR/gpio/gpio1b0_500msblink.sh"
+
     rm /root/.config/autostart/pre.desktop
 fi
 
@@ -840,6 +843,15 @@ if [ $ltpenable -eq 1 ]
 then
     ltptestok=TRUE
     ltphours="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step6.time')"
+    # add norespkill monitoring
+    cd /opt/functest/dep/norespkill
+    insmod ./norespkill.ko
+    sleep 0.5
+    norespmajor=`cat /proc/devices | awk '$2=="norespkill" {print $1}'`
+    mknod /dev/norespkill c $norespmajor 0
+    ltp10min=`expr $ltphours \* 6`
+    ./norespkill_sample 1 $ltp10min
+    sleep 0.5
     echo "LTP压力测试。。。" $ltphours "小时"
     cd /opt/ltp/testscripts
     ./run_ltp_test.sh $ltphours    
