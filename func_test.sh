@@ -852,12 +852,13 @@ then
     ltp10min=`expr $ltphours \* 6`
     ./norespkill_sample 1 $ltp10min
     sleep 0.5
-    echo "LTP压力测试。。。" $ltphours "小时"
+    echo "[信息]:[LTP压力测试]:[]:[LTP压力测试 $ltphours 小时]"
     cd /opt/ltp/testscripts
-    ./run_ltp_test.sh $ltphours    
+    ./run_ltp_test.sh $ltphours
+    echo "[信息]:[LTP压力测试]:[]:[LTP压力测试完成]"
 else
     ltptestok=
-    echo "LTP压力测试禁止"
+    echo "[信息]:[LTP压力测试]:[]:[LTP压力测试禁止]"
 fi
 
 # ========================================================================================
@@ -865,11 +866,11 @@ fi
 logfileupload="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.logupload')"
 if [ $logfileupload -eq 1 ]
 then
-    echo "上传记录文件至服务器"
+    echo "[信息]:[]:[]:[上传记录文件至服务器]"
     atftp -p -l "$RESULTPATH/$fileprefix.log" -r "$fileprefix.log" $gserver
     #  atftp -p -l "$RESULTPATH/audio$fileprefix.mov" -r "audio$fileprefix.mov" $gserver
 else
-    echo "记录文件不上传"
+    echo "[信息]:[]:[]:[记录文件不上传]"
 fi
 
 # =========================================================================================
@@ -881,6 +882,9 @@ else
 fi
 
 echo "[INFO]:[Global]:[]:[$sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12]" >> "$RESULTPATH/$fileprefix.log"
+
+sync "$RESULTPATH/$fileprefix.log"
+sleep 3
 
 # ========================================================================================
 # reboot test

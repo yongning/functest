@@ -75,21 +75,10 @@ then
     rm /etc/systemd/system/reboottest.service
     systemctl daemon-reload
     
-    globalserver="$(cat $CONFFILE | jq -r '.global.server')"
-
-#    sleep 30
+#    globalserver="$(cat $CONFFILE | jq -r '.global.server')"
 #    atftp -p -l "$RESULTPATH/reboot$fileprefix.data" -r "reboot$fileprefix.data" $globalserver
 
-#    mkdir -p /root/.config/autostart
-#    cp /opt/functest/reboottest/desktop /root/.config/autostart/.desktop
-#    chmod 777 /root/.config/autostart/.desktop
-#    sleep 5
 else
    sleep 5
    reboot
 fi
-
-# globalserver="$(cat "/home/gwi/functest/conf/test2.conf" | jq -r '.global.server')"
-
-# sleep 15
-# atftp -p -l "/home/gwi/testresult/reboot$fileprefix.data" -r "reboot$fileprefix.data" $globalserver
