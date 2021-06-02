@@ -8,6 +8,18 @@ function zenerror {
     fi
 }
 
+function functimeout { 
+    func_count=0
+    func_time=$test_timeout
+    echo "test timeout is $func_time minute"
+    while [ $func_count -lt $func_time ]
+    do
+        sleep 2m
+        func_count=`expr $func_count + 2`
+	echo "test $func_count minutes"
+    done
+}
+
 _uid="$(id -u)"
 if [ $_uid -ne 0 ]
 then 
@@ -15,7 +27,7 @@ then
     exit
 fi
 
-RESULTPATH="/var/log/functestresult"
+RESULTPATH="/home"
 DATAPATH="data"
 WAVFILE="file_wav.wav"
 CONFPATH="conf"
@@ -45,14 +57,24 @@ if [ $netdev = "null" ] ; then
     exit 1
 fi
 
-eth1macaddr="$(LANG=C ifconfig $netdev | grep -Po 'HWaddr \K.*$' | tr -d ':')"
-if [ -z $eth1macaddr ] ; then
+testos="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testos')"
+echo $testos
+
+if [ $testos=="uos" ]; then
+    echo "uos"
+    eth1macaddr="$(LANG=C ifconfig $netdev | grep -Po 'ether \K.*$' | tr -d ':')"
+else
+    echo "kylin"
+    eth1macaddr="$(LANG=C ifconfig $netdev | grep -Po 'HWaddr \K.*$' | tr -d ':')"
+fi
+
+gmacaddr=`expr substr "$eth1macaddr" 1 12`
+echo $gmacaddr
+if [ -z $gmacaddr ] ; then
     echo "[错误]:[全局配置]:[]:[配置全局网络接口获取设备信息错误，请检查，测试程序即将退出]"
     sleep 5
     exit 1
 fi 
-gmacaddr=`expr substr "$eth1macaddr" 1 12`
-# echo $gmacaddr
 
 monthday="$(LANG=C date "+%b%d")"
 # echo $monthday
@@ -118,6 +140,14 @@ if [ $swreq -ne 1 ] ; then
     echo "[ERROR]:[Global]:[]:[memtest not installed, please install, application will exit]" >> "$RESULTPATH/$fileprefix.log" 
     exit 1
 fi
+
+swreq="$(dpkg --list mesa-utils 2>/dev/null | grep -w ii | wc -l)"
+if [ $swreq -ne 1 ] ; then
+    echo "[错误]:[全局配置]:[]:[没有检测到mesa-utils软件，请通过apt安装]"
+    echo "[ERROR]:[Global]:[]:[mesa-utils not installed, please install, application will exit]" >> "$RESULTPATH/$fileprefix.log"
+    exit 1
+fi
+
 #==========================================================================
 # test items
 sysmemenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step14.enable')"
@@ -200,38 +230,46 @@ else
     message1_10=
 fi
 
+gpuenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step15.enable')"
+if [ $gpuenable -eq 1 ]
+then
+    message1_11="GPU图形和视频播放测试"
+else
+    message1_11=
+fi
+
 memtestenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step12.enable')"
 if [ $memtestenable -eq 1 ]
 then
-    message1_11="内存稳定性测试"
+    message1_12="内存稳定性测试"
 else
-    message1_11=
+    message1_12=
 fi
 
 ltpenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step6.enable')"
 if [ $ltpenable -eq 1 ]
 then
-    message1_12="LTP系统压力测试"
+    message1_13="LTP系统压力测试"
 else
-    message1_12=
+    message1_13=
 fi
 
 rebootenable="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step5.enable')"
 if [ $rebootenable -eq 1 ]
 then
-    message1_13="系统重启测试"
+    message1_14="系统重启测试"
 else
-    message1_13=
+    message1_14=
 fi
 
-zenity --list --title="单板功能测试工具" --text="测试项目" --column="测试项目描述" $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13 --width=700 --height=500 --timeout=5
+zenity --list --title="单板功能测试工具" --text="测试项目" --column="测试项目描述" $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13 $message1_14 --width=700 --height=500 --timeout=5
 
 if [ $? -eq 1 -o $? -eq -1 ]
 then
     exit 1
 fi
 
-echo "[INFO]:[Global]:[]:[testing items are $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13]" >> "$RESULTPATH/$fileprefix.log"
+echo "[INFO]:[Global]:[]:[testing items are $message1_1 $message1_2 $message1_3 $message1_4 $message1_5 $message1_6 $message1_7 $message1_8 $message1_9 $message1_10 $message1_11 $message1_12 $message1_13 $message1_14]" >> "$RESULTPATH/$fileprefix.log"
 
 testtypetmp="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testtype')"
 if [ $testtypetmp = 'factfunc' ] ; then
@@ -812,6 +850,31 @@ else
     # echo "[INFO]:[USB interface]:[]:[USb interface function test disable]"
 fi
 
+# =====================================================================================
+# graphics and meida player
+if [ $gpuenable -eq 1 ]
+then
+    gputestok=TRUE
+    test_timeout="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step15.time')"
+    echo $test_timeout
+    if [ $testos=uos ] ; then
+	cp "$REALDIR/data/deepin-movie-config.conf" /home/test/.config/deepin/deepin-movie/config.conf
+        deepin-movie /home/test/Videos/dde-introduction.mp4 &
+    fi
+    sleep 15
+    glxgears 1>/dev/null &
+    functimeout
+    killall glxgears
+    if [ $testos=uos ] ; then
+	killall deepin-movie
+    fi
+    echo "[信息]:[GPU和视频播放]:[]:[GPU和视频播放测试正常]"
+    echo "[INFO]:[GPU and video player]:[]:[GPU and video player succeeds]" >> "$RESULTPATH/$fileprefix.log"
+else
+    gputestok=
+    echo "[信息]:[GPU和视频播放]:[]:[GPU和视频播放测试禁止]"
+fi
+
 # ======================================================================================
 # memtest
 if [ $memtestenable -eq 1 ]
@@ -843,15 +906,21 @@ if [ $ltpenable -eq 1 ]
 then
     ltptestok=TRUE
     ltphours="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step6.time')"
+    
+    # disable norespkill monitoring since only use free memory in ltptest
     # add norespkill monitoring
-    cd /opt/functest/dep/norespkill
-    insmod ./norespkill.ko
-    sleep 0.5
-    norespmajor=`cat /proc/devices | awk '$2=="norespkill" {print $1}'`
-    mknod /dev/norespkill c $norespmajor 0
-    ltp10min=`expr $ltphours \* 6`
-    ./norespkill_sample 1 $ltp10min
-    sleep 0.5
+    if 0 ; then
+	echo test
+        cd /opt/functest/dep/norespkill
+        insmod ./norespkill.ko
+        sleep 0.5
+        norespmajor=`cat /proc/devices | awk '$2=="norespkill" {print $1}'`
+        mknod /dev/norespkill c $norespmajor 0
+        ltp10min=`expr $ltphours \* 6`
+        ./norespkill_sample 1 $ltp10min
+        sleep 0.5
+    fi
+
     echo "[信息]:[LTP压力测试]:[]:[LTP压力测试 $ltphours 小时]"
     cd /opt/ltp/testscripts
     ./run_ltp_test.sh $ltphours
@@ -876,12 +945,12 @@ fi
 # =========================================================================================
 testtype="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testtype')"
 if [ $testtype = "stability" ] || [ $testtype = "pcie2usb" ] || [ $testtype = "factstable" ] ; then
-    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12 --width=700 --height=500 --timeout=10
+    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $gputestok $message1_11 $memtestok $message1_12 $ltptestok $message1_13 --width=700 --height=500 --timeout=10
 else
-    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12 --width=700 --height=500
+    zenity --list --title="单板功能测试工具" --text "单板功能测试结果" --checklist --column "测试结果" --column "测试功能描述" $sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $gputestok $message1_11 $memtestok $message1_12 $ltptestok $message1_13 --width=700 --height=500
 fi
 
-echo "[INFO]:[Global]:[]:[$sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $memtestok $message1_11 $ltptestok $message1_12]" >> "$RESULTPATH/$fileprefix.log"
+echo "[INFO]:[Global]:[]:[$sysmemtestok $message1_1 $audiotestok $message1_2 $eth1testok $message1_3 $eth2testok $message1_4 $satatestok $message1_5 $pcislottestok $message1_6 $serialtestok $message1_7 $prntestok $message1_8 $usbtestok $message1_9 $usbdatacopytestok $message1_10 $gputestok $message1_11 $memtestok $message1_12 $ltptestok $message1_13]" >> "$RESULTPATH/$fileprefix.log"
 
 sync "$RESULTPATH/$fileprefix.log"
 sleep 3
@@ -898,12 +967,17 @@ then
 
     if [ -e "$RESULTPATH/rebootnum.data" ] ; then
 	echo "[警示]:[系统重启]:[]:[系统重启测试开始检测到异常rebootnum.data文件]"
-	echo "[WARNING]:[Sysreboot]:[]:[Sysreboot detects abnormal rebootnum.data file]" >> "RESULTPATH/$fileprefix.log"
+	echo "[WARNING]:[Sysreboot]:[]:[Sysreboot detects abnormal rebootnum.data file]" >> "$RESULTPATH/$fileprefix.log"
 	mv "$RESULTPATH/rebootnum.data" "$RESULTPATH/rebootnumabn.data"
     fi
-	
+
     echo 0 > "$RESULTPATH/rebootnum.data"
     chmod 777 "$RESULTPATH/rebootnum.data"
+
+    # add uos user autostart to lightdm.conf
+    cp /etc/lightdm/lightdm.conf "$RESULTPATH/lightdm.conf.uos.original"
+    cp "$REALDIR/ref/lightdm.conf.uos" /etc/lightdm/lightdm.conf
+
     cp "$REALDIR/reboottest/reboottest.service" /etc/systemd/system/reboottest.service
     chmod 777 /etc/systemd/system/reboottest.service
     systemctl daemon-reload

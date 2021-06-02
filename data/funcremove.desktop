@@ -2,6 +2,6 @@
 Version=1.0
 Type=Application
 Terminal=true
-Exec=rm /root/.config/autostart/.desktop
+Exec=gnome-terminal -- /bin/bash -c "sudo /opt/functest/reboottest/rebootokdtor.sh"
 Name=功能测试临时文件清除
 Icon=/opt/functest/data/icon.png

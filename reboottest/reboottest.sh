@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RESULTPATH="/var/log/functestresult"
+RESULTPATH="/home"
 CONFFILE="/opt/functest/conf/test2.conf"
 
 USERNAME="$(cat $CONFFILE | jq -r '.global.username')"
@@ -62,11 +62,14 @@ fi
 if [ $rebootcurnum -gt $rebootnumdef ]
 then
     # echo "reboot test succeed"
-    mkdir -p /root/.config/autostart
-    cp /opt/functest/reboottest/desktop /root/.config/autostart/.desktop
-    chmod 777 /root/.config/autostart/.desktop
+    # mkdir -p /root/.config/autostart
+    # cp /opt/functest/reboottest/desktop /root/.config/autostart/.desktop
+    # chmod 777 /root/.config/autostart/.desktop
+    cp /opt/functest/reboottest/desktop /home/test/.config/autostart/.desktop
+    chmod 777 /home/test/.config/autostart/.desktop
     netdev="$(cat $CONFFILE | jq -r '.global.netdev')"
-    ethmacaddr="$(LANG=C ifconfig $netdev | grep -Po 'HWaddr \K.*$' | tr -d ':')"
+    #ethmacaddr="$(LANG=C ifconfig $netdev | grep -Po 'HWaddr \K.*$' | tr -d ':')"
+    ethmacaddr="$(LANG=C ifconfig $netdev | grep -Po 'ether \K.*$' | tr -d ':')"
     gmacaddr=`expr substr "$ethmacaddr" 1 12`
     monthday="$(LANG-C date "+%b%d")"
     time="$(LANG=C date "+%T" | tr -d ':')"
