@@ -858,8 +858,9 @@ then
     test_timeout="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.step15.time')"
     echo $test_timeout
     if [ $testos=uos ] ; then
-	cp "$REALDIR/data/deepin-movie-config.conf" /home/test/.config/deepin/deepin-movie/config.conf
-        deepin-movie /home/test/Videos/dde-introduction.mp4 &
+	mkdir -p "/root/.config/deepin/deepin-movie"
+	cp "$REALDIR/data/deepin-movie-config.conf" "/root/.config/deepin/deepin-movie/config.conf"
+        deepin-movie "/home/$USERNAME/Videos/dde-introduction.mp4" &
     fi
     sleep 15
     glxgears 1>/dev/null &
