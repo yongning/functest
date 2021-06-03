@@ -8,13 +8,19 @@ A reference on Ubuntu based
 - sudo passwd -u root
 - modify /etc/lightdm/lightdm.conf enable root login and autologin, see ref dir
 
+begin with uos version, do not need root user since disalbe irq affinity function.
+later after testing with kylin, will delete above root section
+
 Testing depends following components
 - jq
 - zenity
 - gnome-terminal
 - atftp
 - memtest
-- ltp (old and micro modified, in dep dir)
+- alsa-utils
+- mesa-utils
+- ltp (special version)
+
 
 Desktop shortcut in data dir
 
@@ -23,4 +29,4 @@ testtype = stability => mainly for long time memory/ltp/reboot test case, reboot
 testtype = pcie2usb => only for pcie to usb device stability test case, reboot + pcie2usb device num test
 testtype = function => normal functional test
 testtype = factfunc => factory functional test, when error prompt error menu
-testtype = factstable => factory stability test, add gpio1b0 led indication
+testtype = factstable => factory stability test
