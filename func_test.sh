@@ -60,7 +60,7 @@ fi
 testos="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testos')"
 echo $testos
 
-if [ $testos=="uos" ]; then
+if [ $testos = "uos" ]; then
     echo "uos"
     eth1macaddr="$(LANG=C ifconfig $netdev | grep -Po 'ether \K.*$' | tr -d ':')"
 else
@@ -438,7 +438,13 @@ else
     echo "[信息]:[音频功能]:[]:[音频功能测试禁止]" 
 fi
 
+# ====================================================================================
+# list mac address waiting for confimr
 
+testtype="$(cat "$REALDIR/$CONFPATH/$CONFFILE" | jq -r '.global.testtype')"
+if [ $testtype = "factfunc" ] ; then
+    $REALDIR/macaddrshow.sh -gl
+fi
 # =====================================================================================
 # test ethernet
 # eth1enable="$(cat "/home/$USERNAME/test_bench/test2.conf" | jq -r '.step7.enable')"
