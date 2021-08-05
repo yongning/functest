@@ -7,20 +7,50 @@ option1=$2
 # macaddr=$3
 REALDIR=$(dirname "$(realpath "$0")")
 
+sed -n '1p' < /etc/lsb-release | grep uos
+if [ $? -ne 0 ] ; then
+    OS=uos
+else
+    OS=kylin
+fi
+
+if [ OS = "kylin" ] ; then
+    eth1macaddr="$(LANG=C ifconfig enp3s0 | grep -Po 'HWaddr \K.*$')"
+else
+    eth1macaddr="$(LANG=C ifconfig enp3s0 | grep -Po 'ether \K.*$')"
+fi
+
+if [ $? -ne 0 ] ; then
+    if [ $option = "-gl" ] ; then
+        zenity --error --text="英特尔i211以太网网卡1地址获取失败 是否已经进行nvm烧录"
+        exit 1
+    fi
+    if [ $option = "-gb" ] ; then
+        eth1macaddr="空"
+    fi
+fi
+eth1macaddr=`expr substr "$eth1macaddr" 1 17`
+
+
+if [ OS = "kylin" ] ; then
+    eth2macaddr="$(LANG=C ifconfig enp4s0 | grep -Po 'HWaddr \K.*$')"
+else
+    eth2macaddr="$(LANG=C ifconfig enp4s0 | grep -Po 'ether \K.*$')"
+fi
+
+if [ $? -ne 0 ] ; then
+    if [ $option = "-gl" ] ; then
+        zenity --error --text="英特尔i211以太网网卡1地址获取失败 是否已经进行nvm烧录"
+        exit 1
+    fi
+    if [ $option = "-gb" ] ; then
+        eth2macaddr="空"
+    fi
+fi
+
+eth2macaddr=`expr substr "$eth2macaddr" 1 17`
+
 if [ $option = "-gl" ] ; then
-
-eth1macaddr="$(LANG=C ifconfig enp3s0 | grep -Po 'HWaddr \K.*$')"
-if [ $? -ne 0 ] ; then
-    zenity --error --text="英特尔i211以太网网卡1地址获取失败 是否已经进行nvm烧录"
-    exit 1
-fi
-eth2macaddr="$(LANG=C ifconfig enp4s0 | grep -Po 'HWaddr \K.*$')"
-if [ $? -ne 0 ] ; then
-    zenity --error --text="英特尔i211以太网网卡2地址获取失败 是否已经进行nvm烧录"
-    exit 1
-fi
-
-#if [ $option = "-gl" ] ; then
 
     message1="i211-1"
     message2="英特尔i211网卡1"
@@ -42,11 +72,9 @@ fi
 if [ $option = "-gb" ] ; then
     message1="i211-1"
     message2="英特尔i211网卡1"
-    eth1macaddr="空"
 
     message4="i211-2"
     message5="英特尔i211网卡2"
-    eth2macaddr="空"
     
     tmp=$(zenity --list --title="以太网卡硬件地址更新工具" --text="以太网卡序号" --column="以太网卡序号" --column="以太网卡序号描述" --column="以太网卡硬件地址" $message1 $message2 $eth1macaddr $message4 $message5 $eth2macaddr --width 600 --height 200)
 fi
